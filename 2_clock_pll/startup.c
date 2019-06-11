@@ -49,14 +49,14 @@ void reset_handler(void)
 void set_sysclk_pll(void)
 {
 	//enable HSE
-	????????
+	SET_BIT(RCC_BASE + RCC_CR_OFFSET, HSEON_BIT);
 
 	//wait
 	while (READ_BIT(RCC_BASE + RCC_CR_OFFSET, HSERDY_BIT) != 1)
 		;
 
 	//set pll
-	???????? //use HSE for PLL source
+	SET_BIT(RCC_BASE + RCC_PLLCFGR_OFFSET, PLLSRC_BIT); //use HSE for PLL source
 
 	//f_HSE = 8 MHz
 	//
@@ -71,23 +71,25 @@ void set_sysclk_pll(void)
 	//
 	WRITE_BITS(RCC_BASE + RCC_PLLCFGR_OFFSET, PLLP_1_BIT, PLLP_0_BIT, 0b00);
 	WRITE_BITS(RCC_BASE + RCC_PLLCFGR_OFFSET, PLLN_8_BIT, PLLN_0_BIT, 168);
-	????????
+	WRITE_BITS(RCC_BASE + RCC_PLLCFGR_OFFSET, PLLM_5_BIT, PLLM_0_BIT, 4);
 
 	//enable pll
-	????????
+	SET_BIT(RCC_BASE + RCC_CR_OFFSET, PLLON_BIT);
 
 	//wait
-	????????
+	while (READ_BIT(RCC_BASE + RCC_CR_OFFSET, PLLRDY_BIT) != 1)
+		;
 
 	//enable flash prefetch buffer
-	????????
+	SET_BIT(FLASH_BASE + FLASH_ACR_OFFSET, PRFTEN_BIT);
 
 	//set flash wait state = 5
-	????????
+	WRITE_BITS(FLASH_BASE + FLASH_ACR_OFFSET, LATENCY_2_BIT, LATENCY_0_BIT, 0b101);
 
 	//use pll
-	????????
+	WRITE_BITS(RCC_BASE + RCC_CFGR_OFFSET, SW_1_BIT, SW_0_BIT, 0b10);
 
 	//wait
-	????????
+	while (READ_BIT(RCC_BASE + RCC_CFGR_OFFSET, SWS_1_BIT) != 1 || READ_BIT(RCC_BASE + RCC_CFGR_OFFSET, SWS_0_BIT) != 0)
+		;
 }
